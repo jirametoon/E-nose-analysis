@@ -197,9 +197,11 @@ def render():
         
         # Apply model button with pulsing effect
         st.markdown('<div class="apply-model-container">', unsafe_allow_html=True)
-        if st.button("💫 Apply Selected Model", key="apply_model", use_container_width=True):
+        apply_model_clicked = st.button("💫 Apply Selected Model", key="apply_model", use_container_width=True)
+        if apply_model_clicked:
             st.session_state["selected_model"] = model_type
             st.session_state["selected_model_version"] = model_version
+            st.session_state["model_applied"] = True
             
             # Check if need to download from Google Drive
             if model_version.startswith("gdrive_"):
@@ -227,68 +229,68 @@ def render():
 
         st.markdown('</div>', unsafe_allow_html=True)
         
-        st.markdown('</div>', unsafe_allow_html=True)  # Close model-selection-card
-        
-        # Display currently used model in a badge-style display
-        current_model = st.session_state.get("selected_model", "CNN1D")
-        current_version = st.session_state.get("selected_model_version", "Default")
-        
-        # Format the display version name
-        display_version = current_version
-        if current_version.startswith("local_"):
-            display_version = f"🖥️ {current_version[6:]} (Local)"
-        elif current_version.startswith("gdrive_"):
-            display_version = f"☁️ {current_version[7:]} (Google Drive)"
-        
-        st.markdown(f"""
-        <div class="active-model-container">
-            <div class="active-model-badge">
-                <div class="active-model-title">Active Model</div>
-                <div class="active-model-details">
-                    <span class="model-type-badge">{current_model}</span>
-                    <span class="model-version-badge">{display_version}</span>
+        # Only show Active Model and Smell Analysis Results after Apply button is clicked
+        if "model_applied" in st.session_state and st.session_state["model_applied"]:
+            # Display currently used model in a badge-style display
+            current_model = st.session_state.get("selected_model", "CNN1D")
+            current_version = st.session_state.get("selected_model_version", "Default")
+            
+            # Format the display version name
+            display_version = current_version
+            if current_version.startswith("local_"):
+                display_version = f"🖥️ {current_version[6:]} (Local)"
+            elif current_version.startswith("gdrive_"):
+                display_version = f"☁️ {current_version[7:]} (Google Drive)"
+            
+            st.markdown(f"""
+            <div class="active-model-container">
+                <div class="active-model-badge">
+                    <div class="active-model-title">Active Model</div>
+                    <div class="active-model-details">
+                        <span class="model-type-badge">{current_model}</span>
+                        <span class="model-version-badge">{display_version}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Display prediction results AFTER model selection
-        st.markdown('<h2 class="result-subheader with-icon"><span class="subheader-icon">👃</span> Smell Analysis Results</h2>', unsafe_allow_html=True)
-        
-        # In a real scenario, we would load and use the model here
-        # For this example, we'll simulate the prediction results
-        smell_options = ["Almond", "Anise", "Apricot", "Bael", "Beef", "Bergamot", "Black tea"]
-        predicted_label = random.choice(smell_options)
-        confidence = random.uniform(70, 98)
-        
-        # Display prediction result with animated reveal
-        st.markdown(f"""
-        <div class="prediction-container glass-card">
-            <div class="prediction-header">
-                <div class="prediction-icon">🎯</div>
-                <h2>Predicted Smell</h2>
+            """, unsafe_allow_html=True)
+            
+            # Display prediction results AFTER model selection
+            st.markdown('<h2 class="result-subheader with-icon"><span class="subheader-icon">👃</span> Smell Analysis Results</h2>', unsafe_allow_html=True)
+            
+            # In a real scenario, we would load and use the model here
+            # For this example, we'll simulate the prediction results
+            smell_options = ["Almond", "Anise", "Apricot", "Bael", "Beef", "Bergamot", "Black tea"]
+            predicted_label = random.choice(smell_options)
+            confidence = random.uniform(70, 98)
+            
+            # Display prediction result with animated reveal
+            st.markdown(f"""
+            <div class="prediction-container glass-card">
+                <div class="prediction-header">
+                    <div class="prediction-icon">🎯</div>
+                    <h2>Predicted Smell</h2>
+                </div>
+                <div class="result-label animated-gradient">{str(predicted_label)}</div>
+                <div class="confidence-meter">
+                    <div class="confidence-fill" style="width: {confidence:.1f}%;"></div>
+                </div>
+                <div class="confidence-value">Confidence: {confidence:.1f}%</div>
             </div>
-            <div class="result-label animated-gradient">{str(predicted_label)}</div>
-            <div class="confidence-meter">
-                <div class="confidence-fill" style="width: {confidence:.1f}%;"></div>
-            </div>
-            <div class="confidence-value">Confidence: {confidence:.1f}%</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Show Top 3 Predictions
-        st.markdown('<h3 class="result-subheader with-icon"><span class="subheader-icon">🏆</span> Top Predictions</h3>', unsafe_allow_html=True)
-        
-        top_predictions = [
-            {"label": predicted_label, "probability": confidence},
-            {"label": smell_options[(smell_options.index(predicted_label) + 1) % len(smell_options)], 
-             "probability": random.uniform(30, 60)},
-            {"label": smell_options[(smell_options.index(predicted_label) + 2) % len(smell_options)], 
-             "probability": random.uniform(10, 30)}
-        ]
-        
-        # Use the imported function for plotting prediction results
-        plot_prediction_results(top_predictions)
+            """, unsafe_allow_html=True)
+            
+            # Show Top 3 Predictions
+            st.markdown('<h3 class="result-subheader with-icon"><span class="subheader-icon">🏆</span> Top Predictions</h3>', unsafe_allow_html=True)
+            
+            top_predictions = [
+                {"label": predicted_label, "probability": confidence},
+                {"label": smell_options[(smell_options.index(predicted_label) + 1) % len(smell_options)], 
+                "probability": random.uniform(30, 60)},
+                {"label": smell_options[(smell_options.index(predicted_label) + 2) % len(smell_options)], 
+                "probability": random.uniform(10, 30)}
+            ]
+            
+            # Use the imported function for plotting prediction results
+            plot_prediction_results(top_predictions)
         
         # # I will update soon
         
