@@ -2,6 +2,8 @@
 
 This directory contains the deep learning model architectures and pre-trained models for the E-NOSE smell classification system.
 
+> **Note:** This project was created for fun with my friends and is not intended for research purposes. Please feel free to use it and train models however you want!
+
 ## Model Architectures
 
 The E-NOSE system supports three different deep learning architectures:
@@ -69,12 +71,6 @@ python inference.py --model_path models/cnn/cnn_v1_best.pt --input_file unseen_e
 
 *Note: Performance metrics are based on our standard test set using a CUDA-capable GPU.*
 
-## Model Selection Guide
-
-- **CNN**: Best for real-time applications where inference speed is critical
-- **LSTM**: Good balance between accuracy and computational requirements
-- **Transformer**: Highest accuracy but more computationally intensive
-
 ## Extending the Models
 
 To add a new model architecture:
@@ -84,16 +80,3 @@ To add a new model architecture:
 3. Implement the required interface methods (`forward`, `predict`, `preprocess_data`)
 
 See existing model implementations for reference.
-
-## Citation
-
-If you use these models in your research, please cite:
-
-```
-@article{enose2025,
-  title={Deep Learning Architectures for Electronic Nose Data Classification},
-  author={E-NOSE Team},
-  journal={Journal of Artificial Olfaction},
-  year={2025}
-}
-```

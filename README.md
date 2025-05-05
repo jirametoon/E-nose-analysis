@@ -8,6 +8,8 @@ A machine learning application for electronic nose (E-NOSE) smell classification
 
 This application uses deep learning models to analyze and classify odors captured by an electronic nose device equipped with gas sensors. The system provides visualization, data analysis, and classification of different smells using CNN, LSTM, and Transformer models.
 
+> **Note:** This project was created for fun with my friends and is not intended for research purposes. Please feel free to use it and train models however you want!
+
 ## Features
 
 - Interactive web interface using Streamlit
