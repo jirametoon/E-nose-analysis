@@ -3,41 +3,15 @@ Result page implementation for the E-nose Analytics application.
 """
 import streamlit as st
 import random
-import os
 from datetime import datetime
 
 from .styles import get_result_styles
+from ..model_manager import ensure_model_available, get_model_path, check_model_exists, get_available_models
 from ..viz_utils import (
     plot_multiple_graphs, 
     plot_sensor_statistics,
     plot_prediction_results
 )
-
-def get_available_models():
-    """Get all available model types and versions"""
-    models = {
-        "CNN1D": [],
-        "LSTMNet": [],
-        "TransformerNet": []
-    }
-    
-    # Map folder names to model types
-    folder_mapping = {
-        "cnn": "CNN1D",
-        "lstm": "LSTMNet",
-        "transformer": "TransformerNet"
-    }
-    
-    base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "models")
-    
-    # Scan model directories
-    for folder_name, model_type in folder_mapping.items():
-        folder_path = os.path.join(base_path, folder_name)
-        if os.path.exists(folder_path):
-            model_files = [f for f in os.listdir(folder_path) if f.endswith('.pt')]
-            models[model_type] = sorted(model_files)
-    
-    return models
 
 def render():
     """
@@ -132,7 +106,7 @@ def render():
         st.markdown('<h2 class="result-subheader with-icon"><span class="subheader-icon">🧠</span> Model Selection</h2>', unsafe_allow_html=True)
         
         # Model selection
-        available_models = get_available_models()
+        available_models = get_available_models(include_gdrive=True)
         
         # Create a horizontal layout with two equal columns
         col1, col2 = st.columns(2)
@@ -162,41 +136,59 @@ def render():
                 model_version = "Default"
                 st.warning(f"No trained models found for {model_type}. Using default model.")
             else:
-                # Clean model names for display
+                # Get model versions and display info
                 model_versions = available_models[model_type]
                 
-                # Extract version numbers for slider
+                # Format display names for model versions
+                def format_model_version(version):
+                    if version.startswith("local_"):
+                        return f"🖥️ {version[6:]} (Local)"
+                    elif version.startswith("gdrive_"):
+                        return f"☁️ {version[7:]} (Google Drive)"
+                    else:
+                        return version
+                
+                # Extract version numbers for sorting
                 def get_version_number(filename):
                     if 'best' in filename:
                         return 999  # Ensure 'best' is at the end
                     try:
                         # Extract number after 'v1_'
-                        version = int(filename.split('_')[1].split('.')[0])
-                        return version
+                        if '_' in filename:
+                            version_part = filename.split('_')
+                            for part in version_part:
+                                if part.isdigit():
+                                    return int(part)
+                        return 0
                     except:
                         return 0
                 
-                # Sort by version number
-                sorted_versions = sorted(model_versions, key=get_version_number)
-                version_numbers = [get_version_number(v) for v in sorted_versions]
+                # Sort by location (Google Drive first) then by version number
+                def sort_model_versions(version):
+                    is_gdrive = version.startswith("gdrive_")
+                    is_best = "best" in version
+                    version_num = get_version_number(version)
+                    # Sort by: Google Drive first, then "best" models, then by version number
+                    return (-1 if is_gdrive else 1, -1 if is_best else 1, -version_num)
                 
-                if 999 in version_numbers:  # If 'best' version exists
-                    default_idx = version_numbers.index(999)
-                else:
-                    default_idx = len(version_numbers) - 1  # Select the highest version
+                sorted_versions = sorted(model_versions, key=sort_model_versions)
+                
+                # Find default selection: prefer Google Drive "best" model
+                default_idx = 0
+                for i, v in enumerate(sorted_versions):
+                    if v.startswith("gdrive_") and "best" in v:
+                        default_idx = i
+                        break
                 
                 st.markdown('<div class="slider-container">', unsafe_allow_html=True)
                 st.markdown('<label class="select-label">Model Version</label>', unsafe_allow_html=True)
                 
-                # Create a list of labels for display
-                slider_labels = {i: sorted_versions[i] for i in range(len(sorted_versions))}
-                
-                # Use selectbox instead of slider since it supports format_func
+                # Use selectbox with formatted display
                 selected_idx = st.selectbox(
                     "Model Version",
                     options=list(range(len(sorted_versions))),
-                    format_func=lambda i: sorted_versions[i],
-                    index=default_idx,
+                    format_func=lambda i: format_model_version(sorted_versions[i]),
+                    index=min(default_idx, len(sorted_versions)-1) if sorted_versions else 0,
                     label_visibility="collapsed"
                 )
                 
@@ -208,8 +200,30 @@ def render():
         if st.button("💫 Apply Selected Model", key="apply_model", use_container_width=True):
             st.session_state["selected_model"] = model_type
             st.session_state["selected_model_version"] = model_version
-            # st.rerun()
-            st.success(f"Applied model: {model_type} ({model_version})")
+            
+            # Check if need to download from Google Drive
+            if model_version.startswith("gdrive_"):
+                model_file = model_version[7:]  # Remove "gdrive_" prefix
+                model_folder = model_type
+                if model_type == "CNN1D":
+                    model_folder = "cnn"
+                elif model_type == "LSTMNet":
+                    model_folder = "lstm" 
+                elif model_type == "TransformerNet":
+                    model_folder = "transformer"
+                    
+                # This will download if not available locally
+                with st.spinner(f"Downloading {model_type} model from Google Drive..."):
+                    ensure_model_available(model_folder, model_version)
+            
+            # Format the display version name
+            display_version = model_version
+            if model_version.startswith("local_"):
+                display_version = f"🖥️ {model_version[6:]} (Local)"
+            elif model_version.startswith("gdrive_"):
+                display_version = f"☁️ {model_version[7:]} (Google Drive)"
+                
+            st.success(f"Applied model: {model_type} ({display_version})")
 
         st.markdown('</div>', unsafe_allow_html=True)
         
@@ -219,13 +233,20 @@ def render():
         current_model = st.session_state.get("selected_model", "CNN1D")
         current_version = st.session_state.get("selected_model_version", "Default")
         
-        st.markdown("""
+        # Format the display version name
+        display_version = current_version
+        if current_version.startswith("local_"):
+            display_version = f"🖥️ {current_version[6:]} (Local)"
+        elif current_version.startswith("gdrive_"):
+            display_version = f"☁️ {current_version[7:]} (Google Drive)"
+        
+        st.markdown(f"""
         <div class="active-model-container">
             <div class="active-model-badge">
                 <div class="active-model-title">Active Model</div>
                 <div class="active-model-details">
-                    <span class="model-type-badge">""" + str(current_model) + """</span>
-                    <span class="model-version-badge">""" + str(current_version) + """</span>
+                    <span class="model-type-badge">{current_model}</span>
+                    <span class="model-version-badge">{display_version}</span>
                 </div>
             </div>
         </div>
@@ -351,7 +372,17 @@ def render():
         st.markdown('<h2 class="section-header with-icon"><span class="section-icon">🧠</span> Available Analysis Models</h2>', unsafe_allow_html=True)
         
         # Show available models in a grid
-        available_models = get_available_models()
+        available_models = get_available_models(include_gdrive=True)
+        
+        # Check if any models were found, if not, show the manual setup button
+        total_models = sum(len(models) for models in available_models.values())
+        
+        if total_models == 0:
+            st.warning("No models were found in the system. You need to set up models to use the application.")
+            if st.button("📥 Set Up Models Manually", use_container_width=True):
+                from ..model_manager import use_direct_gdrive_download
+                use_direct_gdrive_download()
+        
         st.markdown('<div class="model-cards-container">', unsafe_allow_html=True)
         
         cols = st.columns(3)
@@ -365,8 +396,13 @@ def render():
         for i, (model_key, model_name) in enumerate(MODEL_OPTIONS.items()):
             with cols[i]:
                 model_versions = available_models.get(model_key, [])
+                
+                # Count local and Google Drive models
+                local_models = [m for m in model_versions if m.startswith("local_")]
+                gdrive_models = [m for m in model_versions if m.startswith("gdrive_")]
+                
                 num_versions = len(model_versions)
-                has_best = any('best' in v for v in model_versions)
+                has_best = any('best' in version for version in model_versions) if model_versions else False
                 
                 # Create visually appealing model cards
                 st.markdown(f"""
@@ -383,6 +419,10 @@ def render():
                     <div class="model-status success">
                         <span class="status-dot success-dot"></span>
                         {num_versions} versions available
+                    </div>
+                    <div class="model-versions">
+                        <span class="version-source">☁️ {len(gdrive_models)} Google Drive</span>
+                        <span class="version-source">🖥️ {len(local_models)} Local</span>
                     </div>
                     """, unsafe_allow_html=True)
                     
@@ -437,6 +477,16 @@ def render():
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="tip-container" style="margin-top: 20px;">
+                <h4>📌 About Models</h4>
+                <p>This application can use models from two sources:</p>
+                <ul>
+                    <li><span class="highlight">☁️ Google Drive</span> - Pre-trained models stored in Google Drive</li>
+                    <li><span class="highlight">🖥️ Local</span> - Models trained or downloaded on your local machine</li>
+                </ul>
+                <p>When you select a model for analysis, it will be downloaded from Google Drive if not already available locally.</p>
             </div>
             """, unsafe_allow_html=True)
     
