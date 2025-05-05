@@ -26,10 +26,6 @@ streamlit-env/
 *.sqlite3
 logs/
 
-# ─── Streamlit config ─────────────────────────────────────────────────
-.streamlit/secrets.toml
-.streamlit/config.toml
-
 # ─── Models (binary) ───────────────────────────────────────────────────
 # Comment out if you want to include trained models in your repo
 models/**/*.pt

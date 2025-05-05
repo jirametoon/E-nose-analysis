@@ -1,0 +1,21 @@
+# .streamlit/config.toml
+
+[server]
+headless = true
+#port = 8501
+enableCORS = false
+enableXsrfProtection = false
+# Disable file watcher to prevent PyTorch __path__._path errors
+fileWatcherType = "none"
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base="light"
+primaryColor = "#f37c45"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
+font = "sans serif"
