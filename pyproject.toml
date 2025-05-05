@@ -2,8 +2,6 @@
 requires = [
     "setuptools>=65.5.1",
     "wheel>=0.40.0",
-    "setuptools-scm>=7.0.0",
-    "setuptools.distutils",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -12,5 +10,5 @@ name = "e-nose-analysis"
 description = "Electronic Nose Analysis System"
 version = "0.1.0"
 readme = "README.md"
-requires-python = ">=3.8,<3.12"  # Restrict Python version to be compatible with torch
+requires-python = ">=3.8"  # Allow Python 3.12 support
 license = {text = "MIT"}
