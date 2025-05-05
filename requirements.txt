@@ -29,7 +29,7 @@ requests==2.31.0
 jsonschema==4.19.0
 
 # Visualization & UI
-pillow==10.0.0
+pillow==9.5.0
 
 # File Handling
 gdown==4.7.1
@@ -39,3 +39,5 @@ ipykernel==6.25.1  # For Jupyter notebook support
 
 # Development Tools
 setuptools>=65.5.1  # For compatibility with newer Python versions
+wheel>=0.40.0
+setuptools-scm>=7.0.0
