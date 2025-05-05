@@ -18,17 +18,16 @@ import json
 import numpy as np
 import torch
 import torch.nn as nn
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib.gridspec import GridSpec
 import pandas as pd
 from torch.utils.data import DataLoader
 
 from models.cnn import CNN1D
 from models.lstm import LSTMNet
 from models.transformer import TransformerNet
-from utils.data_utils import load_smell_dataset, create_dataloaders
+from utils.data_utils import load_smell_dataset
 
 # Constants
 MODEL_CLASSES = {

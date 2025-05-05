@@ -80,7 +80,7 @@ python evaluate_model.py --help
 To compare the performance of different model architectures:
 
 ```bash
-python compare_models.py --models cnn lstm transformer --data_dir data/15cycle_datasets
+python compare_models.py --models models/cnn/cnn_v1_best.pt models/lstm/lstm_v1_best.pt models/transformer/transformer_v1_best.pt
 ```
 
 This will generate comparative visualizations and performance metrics for the specified models. You can also compare specific model versions:
