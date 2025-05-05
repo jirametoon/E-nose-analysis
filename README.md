@@ -58,6 +58,24 @@ python train_model.py --model cnn --data_dir data/15cycle_datasets --epochs 200
 
 See `python train_model.py --help` for all options.
 
+### Data Format
+
+The input data for the models should be CSV files with the following structure:
+
+- **Headers**: Date, Time, Temp, Flow Rate, G1-G15 (sensor readings), Cycle Loop, Mode
+- **Modes**: The data cycles through three phases: Resting → Sampling → Purging → Resting
+- **Sample File**: A sample CSV file is included in `data/samples/sample.csv` to demonstrate the expected format
+
+Example format:
+```
+Date,Time,Temp,Flow Rate,G1,G2,...,G15,Cycle Loop,Mode
+1/5/2023,16:44:30,55.119,299.865,0,-1.6,...,-6,0,Resting
+1/5/2023,16:44:46,55.110,299.865,-2,-7.6,...,-24.8,1,Sampling
+1/5/2023,16:45:16,55.021,299.865,87.4,287.8,...,1876,1,Purging
+```
+
+Each odor class should be represented by a separate CSV file named with the format `[OdorName]_final.csv`.
+
 ## Project Structure
 
 ```
@@ -72,7 +90,8 @@ models/                 # Model architecture definitions and saved models
   ├── lstm/             # Saved LSTM models
   └── transformer/      # Saved Transformer models
 data/                   # Dataset files
-  └── 15cycle_datasets/ # Training data
+  ├── 15cycle_datasets/ # Training data
+  └── samples/          # Sample data format for reference
 utils/                  # Utility functions
   ├── data_utils.py     # Data loading and preprocessing
   ├── inference.py      # Model inference

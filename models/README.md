@@ -52,16 +52,6 @@ python train_model.py --model lstm --data_dir data/15cycle_datasets --epochs 150
 python train_model.py --model transformer --data_dir data/15cycle_datasets --epochs 250 --device cuda --cycle_length 60 --model_name transformer_v1
 ```
 
-### Evaluating Models
-
-```bash
-# Evaluate the best CNN model
-python evaluate_model.py --model_path models/cnn/cnn_v1_best.pt --data_dir data/15cycle_datasets
-
-# Compare performance between model types
-python compare_models.py --models models/cnn/cnn_v1_best.pt models/lstm/lstm_v1_best.pt models/transformer/transformer_v1_best.pt
-```
-
 ### Inference with Pre-trained Models
 
 ```bash

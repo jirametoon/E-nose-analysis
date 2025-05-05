@@ -40,6 +40,7 @@ models/**/*.joblib
 # Include dataset structure but ignore large files
 data/**/*.csv
 !data/sample.csv
+!data/samples/sample.csv
 unseen_example/*.csv
 
 # ─── Plots and large images ───────────────────────────────────────────
@@ -71,3 +72,7 @@ Thumbs.db
 .env*
 *.pem
 *.key
+
+# ─── compare and evaluation results ─────────────────────────────────────────────────
+evaluation_results/*
+comparison_results/*
