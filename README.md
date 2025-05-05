@@ -60,6 +60,40 @@ python train_model.py --model cnn --data_dir data/15cycle_datasets --epochs 200
 
 See `python train_model.py --help` for all options.
 
+### Evaluating Models
+
+To evaluate a trained model on test data:
+
+```bash
+python evaluate_model.py --model cnn --model_path models/cnn/cnn_v1_best.pt --data_dir data/15cycle_datasets
+```
+
+This will generate evaluation metrics including accuracy, precision, recall, F1-score, and a confusion matrix in the `plots` directory.
+
+Additional options:
+```bash
+python evaluate_model.py --help
+```
+
+### Comparing Models
+
+To compare the performance of different model architectures:
+
+```bash
+python compare_models.py --models cnn lstm transformer --data_dir data/15cycle_datasets
+```
+
+This will generate comparative visualizations and performance metrics for the specified models. You can also compare specific model versions:
+
+```bash
+python compare_models.py --models cnn lstm --model_paths models/cnn/cnn_v1_best.pt models/lstm/lstm_v1_best.pt
+```
+
+See all options:
+```bash
+python compare_models.py --help
+```
+
 ### Data Format
 
 The input data for the models should be CSV files with the following structure:
@@ -83,6 +117,8 @@ Each odor class should be represented by a separate CSV file named with the form
 ```
 app.py                  # Main Streamlit application
 train_model.py          # Model training script
+evaluate_model.py       # Model evaluation script
+compare_models.py       # Script for comparing different models
 requirements.txt        # Python dependencies
 models/                 # Model architecture definitions and saved models
   ├── cnn.py

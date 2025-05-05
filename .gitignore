@@ -31,6 +31,9 @@ logs/
 models/**/*.pt
 models/**/*.pth
 models/**/*.joblib
+models/cnn/*
+models/lstm/*
+models/transformer/*
 
 # ─── Data ─────────────────────────────────────────────────────────────
 # Include dataset structure but ignore large files
