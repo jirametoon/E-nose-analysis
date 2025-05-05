@@ -29,7 +29,7 @@ This application uses deep learning models to analyze and classify odors capture
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/jirametoon/E-nose.git
+   git clone https://github.com/jirametoon/E-nose-analysis.git
    cd e-nose-analytics
    ```
 
@@ -92,7 +92,7 @@ models/                 # Model architecture definitions and saved models
   ├── lstm/             # Saved LSTM models
   └── transformer/      # Saved Transformer models
 data/                   # Dataset files
-  ├── 15cycle_datasets/ # Training data
+  ├── datasets/         # Training data
   └── samples/          # Sample data format for reference
 utils/                  # Utility functions
   ├── data_utils.py     # Data loading and preprocessing
